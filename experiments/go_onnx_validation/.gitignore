@@ -1,0 +1,10 @@
+# Compiled binaries
+*.exe
+validation
+validation.exe
+
+# Inference results
+inference_results.json
+
+# Go build artifacts
+go.sum
