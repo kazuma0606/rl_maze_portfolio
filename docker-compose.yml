@@ -1,0 +1,90 @@
+services:
+  # PostgreSQL Database
+  # Used by: Go inference server, Python training service, MLflow backend
+  postgres:
+    image: postgres:15-alpine
+    container_name: rl-maze-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: rl_maze
+    ports:
+      - "5432:5432"
+    volumes:
+      # Data persistence
+      - postgres_data:/var/lib/postgresql/data
+      # Optional: initialization scripts
+      # - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rl-maze-network
+
+  # MongoDB Database
+  # Used by: Go inference server for logging
+  mongodb:
+    image: mongo:7-jammy
+    container_name: rl-maze-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_INITDB_DATABASE: rl_maze_logs
+    ports:
+      - "27017:27017"
+    volumes:
+      # Data persistence
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rl-maze-network
+
+  # MLflow Tracking Server (Optional - for experiment tracking)
+  # Uncomment to run MLflow with PostgreSQL backend
+  # mlflow:
+  #   image: ghcr.io/mlflow/mlflow:v2.9.2
+  #   container_name: rl-maze-mlflow
+  #   restart: unless-stopped
+  #   environment:
+  #     MLFLOW_BACKEND_STORE_URI: postgresql://postgres:postgres@postgres:5432/rl_maze
+  #     MLFLOW_DEFAULT_ARTIFACT_ROOT: /mlflow/artifacts
+  #   ports:
+  #     - "5000:5000"
+  #   volumes:
+  #     - mlflow_artifacts:/mlflow/artifacts
+  #   command: >
+  #     mlflow server
+  #     --backend-store-uri postgresql://postgres:postgres@postgres:5432/rl_maze
+  #     --default-artifact-root /mlflow/artifacts
+  #     --host 0.0.0.0
+  #     --port 5000
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   networks:
+  #     - rl-maze-network
+
+# Named volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
+  # mlflow_artifacts:
+  #   driver: local
+
+# Network for service communication
+networks:
+  rl-maze-network:
+    driver: bridge

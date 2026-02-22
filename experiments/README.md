@@ -61,6 +61,20 @@ source .venv/bin/activate
 uv pip install -r experiments/requirements.txt
 ```
 
+**注意:** Windows環境でpygameのインストールに失敗する場合は、以下の代替方法を試してください：
+
+```bash
+# 方法1: pipを使用してインストール
+uv pip install pip
+python -m pip install pygame
+
+# 方法2: 事前ビルド済みホイールを使用
+# https://www.lfd.uci.edu/~gohlke/pythonlibs/#pygame から適切な .whl ファイルをダウンロード
+python -m pip install pygame-2.x.x-cpXX-cpXX-win_amd64.whl
+```
+
+pygameは可視化用のパッケージです。Notebookの実行には必須ではありませんが、アニメーション表示を行う場合は必要です。
+
 ### 3. CUDA版PyTorchのインストール
 
 **重要:** CPU版ではなく、必ずCUDA対応版をインストールしてください。

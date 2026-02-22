@@ -37,33 +37,59 @@
   - `experiments/.env.example` を作成
   - _要件: 8.2, 8.6_
 
-- [ ] 4. backend/inference/ ディレクトリ構成の作成
+- [x] 4. backend/inference/ ディレクトリ構成の作成
+
+
+
+
+
   - `cmd/`, `internal/domain/`, `internal/usecase/`, `internal/interface/handler/`, `internal/interface/websocket/`, `internal/infrastructure/onnx/`, `internal/infrastructure/postgres/`, `internal/infrastructure/mongodb/`, `di/` ディレクトリを作成
   - `go.mod` を初期化（`go mod init github.com/[user]/rl-maze/backend/inference`）
   - `backend/inference/README.md` を作成（起動方法・環境変数・エンドポイント一覧を記載）
   - `backend/inference/.env.example` を作成（DATABASE_URL, MONGODB_URI を含む）
   - _要件: 8.3, 8.6_
 
-- [ ] 5. backend/training/ ディレクトリ構成の作成
+- [x] 5. backend/training/ ディレクトリ構成の作成
+
+
+
+
+
   - `backend/training/` ディレクトリを作成
   - `backend/training/requirements.txt` を作成（fastapi, stable-baselines3, mlflow, psycopg2, pydantic を含む）
   - `backend/training/README.md` を作成（起動方法・環境変数・トレーニング実行手順・uv環境構築手順・CUDA版PyTorchインストール方法を記載）
   - `backend/training/.env.example` を作成（MLFLOW_TRACKING_URI, DATABASE_URL を含む）
   - _要件: 8.6_
 
-- [ ] 6. frontend/ ディレクトリ構成の作成
+- [x] 6. frontend/ ディレクトリ構成の作成
+
+
+
+
+
+
   - `pnpm create next-app@latest frontend --typescript --tailwind --app --no-src-dir` を実行
   - `frontend/README.md` を作成（起動方法・環境変数・pnpmコマンドを記載）
   - `frontend/.env.example` を作成（NEXT_PUBLIC_WS_URL, NEXT_PUBLIC_API_URL を含む）
   - _要件: 8.4, 8.6_
 
-- [ ] 7. docker-compose.yml の作成
+- [x] 7. docker-compose.yml の作成
+
+
+
+
+
   - PostgreSQL, MongoDB サービスを定義
   - ローカル開発用の環境変数を設定
   - ボリュームマウントを設定（データ永続化）
   - _要件: 7.5_
 
-- [ ] 8. Python依存パッケージのインストール
+- [x] 8. Python依存パッケージのインストール
+
+
+
+
+
   - 仮想環境をアクティベート
   - `uv pip install -r experiments/requirements.txt` を実行
   - `uv pip install -r backend/training/requirements.txt` を実行
@@ -71,7 +97,12 @@
   - CUDAバージョンはRTX 5070系ドライバに合わせて確認
   - _要件: 8.2, 8.6_
 
-- [ ] 9. 00_rl_basic.ipynb の実装
+- [x] 9. 00_rl_basic.ipynb の実装
+
+
+
+
+
   - CartPole環境でランダムエージェントと訓練済みエージェントのアニメーションを並べて表示
   - 学習曲線を記録し、「なぜRLが必要か」を視覚的に示す
   - _要件: 1.1_

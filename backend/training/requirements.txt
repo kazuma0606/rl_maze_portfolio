@@ -1,0 +1,31 @@
+# RL Maze Training Service - Python Dependencies
+
+# Web Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+websockets==12.0
+
+# Reinforcement Learning
+stable-baselines3==2.2.1
+gymnasium==0.29.1
+
+# Experiment Tracking
+mlflow==2.10.0
+
+# Database
+psycopg2-binary==2.9.9
+
+# Data Validation
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# ONNX Export
+onnx==1.15.0
+tf2onnx==1.16.1
+
+# Utilities
+numpy==1.26.3
+python-dotenv==1.0.0
+
+# Note: CUDA-enabled PyTorch should be installed separately using:
+# uv pip install torch --index-url https://download.pytorch.org/whl/cu121

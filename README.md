@@ -111,3 +111,64 @@ Please refer to each service README for detailed setup instructions.
 - Frontend: `frontend/README.md`
 - Inference Server: `backend/inference/README.md`
 - Training Service: `backend/training/README.md`
+
+---
+
+## Docker Compose Setup
+
+The project includes a `docker-compose.yml` file for running PostgreSQL and MongoDB locally for development.
+
+### Starting the databases
+
+```bash
+docker-compose up -d
+```
+
+This will start:
+- **PostgreSQL** on port 5432 (used by inference server, training service, and MLflow)
+- **MongoDB** on port 27017 (used by inference server for logging)
+
+### Stopping the databases
+
+```bash
+docker-compose down
+```
+
+### Stopping and removing volumes (⚠️ deletes all data)
+
+```bash
+docker-compose down -v
+```
+
+### Checking service status
+
+```bash
+docker-compose ps
+```
+
+### Viewing logs
+
+```bash
+# All services
+docker-compose logs -f
+
+# Specific service
+docker-compose logs -f postgres
+docker-compose logs -f mongodb
+```
+
+### Connection strings for local development
+
+Once the services are running, use these connection strings in your `.env` files:
+
+- **PostgreSQL:** `postgresql://postgres:postgres@localhost:5432/rl_maze?sslmode=disable`
+- **MongoDB:** `mongodb://localhost:27017/rl_maze_logs`
+
+### Data persistence
+
+Data is persisted in Docker volumes:
+- `postgres_data`: PostgreSQL database files
+- `mongodb_data`: MongoDB database files
+- `mongodb_config`: MongoDB configuration files
+
+These volumes persist even after `docker-compose down`, ensuring your data is not lost between restarts.
