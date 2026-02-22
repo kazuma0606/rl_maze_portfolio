@@ -4,12 +4,20 @@
 
 ## タスクリスト
 
-- [ ] 1. ルートディレクトリ構造の作成
+- [x] 1. ルートディレクトリ構造の作成
+
+
+
+
+
   - `experiments/`, `frontend/`, `backend/inference/`, `backend/training/`, `ml/envs/`, `ml/models/`, `ml/experiments/`, `docs/` ディレクトリを作成
   - ルート `.gitignore` を作成（`.env*`, `*.pyc`, `__pycache__/`, `node_modules/`, `.next/`, `dist/`, `*.log`, `.venv/` を除外）
   - _要件: 8.1_
 
-- [ ] 2. Python仮想環境のセットアップ
+- [-] 2. Python仮想環境のセットアップ
+
+
+
   - プロジェクトルートで `uv venv` を実行して仮想環境を作成
   - `.venv/` ディレクトリが作成されることを確認
   - README.mdに仮想環境のアクティベート方法を記載（Windows: `.venv\Scripts\activate`, Linux/Mac: `source .venv/bin/activate`）
