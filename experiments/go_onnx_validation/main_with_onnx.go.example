@@ -1,0 +1,185 @@
+// This file demonstrates real ONNX Runtime integration
+// To use this:
+// 1. Install ONNX Runtime C library
+// 2. Rename this file to main_with_onnx.go
+// 3. Update go.mod to include: require github.com/yalue/onnxruntime_go v1.11.0
+// 4. Run: go mod tidy && go run main_with_onnx.go
+
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"time"
+
+	ort "github.com/yalue/onnxruntime_go"
+)
+
+func main() {
+	fmt.Println("=== Go ONNX Validation (Real ONNX Runtime) ===")
+	fmt.Println("Testing ONNX Runtime integration with Go")
+	fmt.Println()
+
+	// Initialize ONNX Runtime
+	if err := ort.InitializeEnvironment(); err != nil {
+		log.Fatalf("Failed to initialize ONNX Runtime: %v", err)
+	}
+	defer ort.DestroyEnvironment()
+	fmt.Println("✓ ONNX Runtime initialized")
+
+	// Get model path (relative to project root)
+	modelPath := filepath.Join("..", "..", "ml", "models", "dqn_cartpole.onnx")
+	if _, err := os.Stat(modelPath); os.IsNotExist(err) {
+		log.Fatalf("Model file not found: %s", modelPath)
+	}
+	fmt.Printf("✓ Model file found: %s\n", modelPath)
+
+	// Load ONNX model
+	session, err := ort.NewSession(modelPath, ort.NewSessionOptions())
+	if err != nil {
+		log.Fatalf("Failed to load ONNX model: %v", err)
+	}
+	defer session.Destroy()
+	fmt.Println("✓ ONNX model loaded successfully")
+
+	// Get input/output information
+	inputCount, err := session.GetInputCount()
+	if err != nil {
+		log.Fatalf("Failed to get input count: %v", err)
+	}
+	outputCount, err := session.GetOutputCount()
+	if err != nil {
+		log.Fatalf("Failed to get output count: %v", err)
+	}
+
+	fmt.Printf("\nModel Information:\n")
+	fmt.Printf("  Input count: %d\n", inputCount)
+	fmt.Printf("  Output count: %d\n", outputCount)
+
+	// Get input shape
+	inputName, err := session.GetInputName(0)
+	if err != nil {
+		log.Fatalf("Failed to get input name: %v", err)
+	}
+	fmt.Printf("  Input name: %s\n", inputName)
+
+	// Get output shape
+	outputName, err := session.GetOutputName(0)
+	if err != nil {
+		log.Fatalf("Failed to get output name: %v", err)
+	}
+	fmt.Printf("  Output name: %s\n", outputName)
+
+	// Prepare test input (CartPole observation: 4 dimensions)
+	// Example observation: [cart_position, cart_velocity, pole_angle, pole_angular_velocity]
+	testObservation := []float32{0.0, 0.0, 0.0, 0.0}
+	inputShape := ort.NewShape(1, 4) // Batch size 1, 4 features
+
+	inputTensor, err := ort.NewTensor(inputShape, testObservation)
+	if err != nil {
+		log.Fatalf("Failed to create input tensor: %v", err)
+	}
+	defer inputTensor.Destroy()
+
+	fmt.Printf("\nTest Input:\n")
+	fmt.Printf("  Shape: %v\n", inputShape.Dimensions)
+	fmt.Printf("  Data: %v\n", testObservation)
+
+	// Run inference and measure latency
+	fmt.Println("\n=== Running Inference Tests ===")
+
+	numRuns := 100
+	latencies := make([]time.Duration, numRuns)
+
+	for i := 0; i < numRuns; i++ {
+		start := time.Now()
+
+		outputTensor, err := session.Run(
+			[]ort.ArbitraryTensor{inputTensor},
+			[]string{inputName},
+			[]string{outputName},
+		)
+		if err != nil {
+			log.Fatalf("Inference failed on run %d: %v", i+1, err)
+		}
+
+		latency := time.Since(start)
+		latencies[i] = latency
+
+		// Get output data (only on first run for display)
+		if i == 0 {
+			outputData := outputTensor[0].GetData()
+			fmt.Printf("\nFirst Inference Result:\n")
+			fmt.Printf("  Output shape: %v\n", outputTensor[0].GetShape().Dimensions)
+			fmt.Printf("  Q-values: %v\n", outputData)
+
+			// Determine action (argmax of Q-values)
+			qValues := outputData.([]float32)
+			maxQ := qValues[0]
+			action := 0
+			for j, q := range qValues {
+				if q > maxQ {
+					maxQ = q
+					action = j
+				}
+			}
+			fmt.Printf("  Selected action: %d (Q-value: %.4f)\n", action, maxQ)
+		}
+
+		// Clean up output tensors
+		for _, tensor := range outputTensor {
+			tensor.Destroy()
+		}
+	}
+
+	// Calculate latency statistics
+	fmt.Printf("\n=== Latency Statistics (%d runs) ===\n", numRuns)
+
+	var totalLatency time.Duration
+	minLatency := latencies[0]
+	maxLatency := latencies[0]
+
+	for _, latency := range latencies {
+		totalLatency += latency
+		if latency < minLatency {
+			minLatency = latency
+		}
+		if latency > maxLatency {
+			maxLatency = latency
+		}
+	}
+
+	avgLatency := totalLatency / time.Duration(numRuns)
+
+	// Calculate p95 latency
+	sortedLatencies := make([]time.Duration, numRuns)
+	copy(sortedLatencies, latencies)
+	// Simple bubble sort for small array
+	for i := 0; i < numRuns-1; i++ {
+		for j := 0; j < numRuns-i-1; j++ {
+			if sortedLatencies[j] > sortedLatencies[j+1] {
+				sortedLatencies[j], sortedLatencies[j+1] = sortedLatencies[j+1], sortedLatencies[j]
+			}
+		}
+	}
+	p95Index := int(float64(numRuns) * 0.95)
+	p95Latency := sortedLatencies[p95Index]
+
+	fmt.Printf("  Min:     %v\n", minLatency)
+	fmt.Printf("  Max:     %v\n", maxLatency)
+	fmt.Printf("  Average: %v\n", avgLatency)
+	fmt.Printf("  P95:     %v\n", p95Latency)
+
+	// Check if p95 meets requirement (< 50ms)
+	fmt.Println("\n=== Validation Results ===")
+	if p95Latency < 50*time.Millisecond {
+		fmt.Printf("✓ PASS: P95 latency (%.2fms) is below 50ms threshold\n", float64(p95Latency.Microseconds())/1000.0)
+	} else {
+		fmt.Printf("✗ FAIL: P95 latency (%.2fms) exceeds 50ms threshold\n", float64(p95Latency.Microseconds())/1000.0)
+	}
+
+	fmt.Println("✓ Go-ONNX integration validated successfully")
+	fmt.Println("\n=== Validation Complete ===")
+}
