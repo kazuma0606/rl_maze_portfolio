@@ -1,0 +1,19 @@
+# RL Maze Phase 1 - Experiments Dependencies
+
+# Reinforcement Learning
+gymnasium>=0.29.0
+stable-baselines3>=2.2.0
+
+# Model Export
+onnx>=1.15.0
+onnxruntime>=1.16.0
+
+# Visualization
+matplotlib>=3.8.0
+pygame>=2.5.0
+
+# Property-Based Testing
+hypothesis>=6.92.0
+
+# Additional utilities
+numpy>=1.24.0
