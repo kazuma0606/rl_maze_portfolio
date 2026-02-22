@@ -157,7 +157,11 @@
   - 入出力シェイプを検証
   - _要件: 1.5_
 
-- [ ] 14. go_onnx_validation/ の実装
+- [x] 14. go_onnx_validation/ の実装
+
+
+
+
   - GoでONNXモデルをロードして推論を実行
   - Go-ONNX統合を検証
   - レイテンシを計測
