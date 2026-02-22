@@ -7,6 +7,7 @@ stable-baselines3>=2.2.0
 # Model Export
 onnx>=1.15.0
 onnxruntime>=1.16.0
+onnxscript>=0.6.0
 
 # Visualization
 matplotlib>=3.8.0
